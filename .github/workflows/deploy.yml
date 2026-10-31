@@ -26,6 +26,8 @@ jobs:
       - name: Clean Replit junk and catalogs
         run: |
           rm -f pnpm-workspace.yaml
+          # Удаляем локальные workspace-зависимости (например, @workspace/api-client-react)
+          find . -name "package.json" -exec sed -i '/@workspace\//d' {} +
           find . -name "package.json" -exec sed -i 's/"catalog:[^"]*"/"latest"/g' {} +
           find . -name "package.json" -exec sed -i 's/"catalog:"/"latest"/g' {} +
           find . -name "package.json" -exec sed -i 's/"workspace:\*"/"latest"/g' {} +
@@ -44,3 +46,4 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./dist
           cname: lutchic.de5.net
+          
