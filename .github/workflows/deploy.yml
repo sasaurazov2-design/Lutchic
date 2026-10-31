@@ -23,8 +23,10 @@ jobs:
         with:
           node-version: 20
 
-      - name: Remove pnpm workspace config to avoid catalog errors
-        run: rm -f pnpm-workspace.yaml
+      - name: Clean Replit plugins and catalog configs
+        run: |
+          rm -f pnpm-workspace.yaml
+          find . -name "package.json" -exec sed -i '/@replit\/vite-plugin-cartographer/d' {} +
 
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
