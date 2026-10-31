@@ -25,12 +25,8 @@ jobs:
 
       - name: Clean Replit junk and create valid configs
         run: |
-          rm -f pnpm-workspace.yaml
-          rm -f vite.config.ts
-          rm -f tsconfig.base.json
-          rm -f tsconfig.json
+          rm -f pnpm-workspace.yaml vite.config.ts tsconfig.base.json tsconfig.json
 
-          # 1. Создаем чистый vite.config.ts с поддержкой алиаса @
           cat << 'EOF' > vite.config.ts
           import { defineConfig } from 'vite';
           import react from '@vitejs/plugin-react';
@@ -38,6 +34,7 @@ jobs:
 
           export default defineConfig({
             plugins: [react()],
+            base: '/',
             resolve: {
               alias: {
                 '@': path.resolve(__dirname, './src'),
@@ -46,7 +43,6 @@ jobs:
           });
           EOF
 
-          # 2. Создаем автономый tsconfig.json без ссылок на tsconfig.base.json
           cat << 'EOF' > tsconfig.json
           {
             "compilerOptions": {
@@ -71,7 +67,6 @@ jobs:
           }
           EOF
 
-          # 3. Чистим package.json от воркспейсов и прочего мусора
           find . -name "package.json" -type f -exec sed -i 's/"build":\s*"[^"]*"/"build": "vite build"/g' {} +
           find . -name "package.json" -type f -exec sed -i '/@workspace\//d' {} +
           find . -name "package.json" -type f -exec sed -i 's/"catalog:[^"]*"/"latest"/g' {} +
@@ -83,6 +78,7 @@ jobs:
         run: |
           pnpm install --no-frozen-lockfile
           pnpm run build
+          cp dist/index.html dist/404.html
         env:
           BASE_PATH: '/'
 
