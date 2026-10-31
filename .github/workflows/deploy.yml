@@ -23,13 +23,16 @@ jobs:
         with:
           node-version: 20
 
-      - name: Clean Replit catalogs and plugins
+      - name: Strip catalogs and fix dependencies
         run: |
-          # Очищаем только каталог из воркспейса, сохраняя структуру пакетов
+          # Полностью очищаем файл воркспейса от каталогов
           if [ -f "pnpm-workspace.yaml" ]; then
-            sed -i '/catalogs:/,$d' pnpm-workspace.yaml
+            grep -v "catalogs:" pnpm-workspace.yaml > temp.yaml && mv temp.yaml pnpm-workspace.yaml
           fi
-          # Убираем только Replit-плагины из package.json, не трогая локальные воркспейсы
+          # Заменяем ВСЕ упоминания catalog: на latest во всех package.json
+          find . -name "package.json" -exec sed -i 's/"catalog:[^"]*"/"latest"/g' {} +
+          find . -name "package.json" -exec sed -i 's/"catalog:"/"latest"/g' {} +
+          # Удаляем плагины Replit
           find . -name "package.json" -exec sed -i '/@replit\//d' {} +
 
       - name: Install dependencies
