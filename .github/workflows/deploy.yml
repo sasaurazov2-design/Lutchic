@@ -23,31 +23,19 @@ jobs:
         with:
           node-version: 20
 
-      - name: Strip catalogs and fix dependencies
+      - name: Clean Replit junk and catalogs
         run: |
-          # Полностью очищаем файл воркспейса от каталогов
-          if [ -f "pnpm-workspace.yaml" ]; then
-            grep -v "catalogs:" pnpm-workspace.yaml > temp.yaml && mv temp.yaml pnpm-workspace.yaml
-          fi
-          
-          # Заменяем ВСЕ упоминания catalog: на latest во всех package.json
+          rm -f pnpm-workspace.yaml
           find . -name "package.json" -exec sed -i 's/"catalog:[^"]*"/"latest"/g' {} +
           find . -name "package.json" -exec sed -i 's/"catalog:"/"latest"/g' {} +
-          
-          # Заменяем workspace:* на latest (решает ошибку с @workspace/api-client-react)
           find . -name "package.json" -exec sed -i 's/"workspace:\*"/"latest"/g' {} +
-          
-          # Удаляем плагины Replit
           find . -name "package.json" -exec sed -i '/@replit\//d' {} +
-          
-          # Удаляем старый lock-файл, чтобы pnpm не тянул старые ссылки на воркспейс
-          rm -f pnpm-lock.yaml
 
-      - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile --recursive
-
-      - name: Build project
-        run: pnpm --filter @workspace/lutchic-socials run build
+      - name: Install dependencies and build inside package dir
+        run: |
+          cd artifacts/lutchic-socials
+          pnpm install --no-frozen-lockfile
+          pnpm run build
         env:
           BASE_PATH: '/'
 
