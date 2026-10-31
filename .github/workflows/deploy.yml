@@ -26,12 +26,18 @@ jobs:
       - name: Clean Replit junk and catalogs
         run: |
           rm -f pnpm-workspace.yaml
-          # Удаляем локальные workspace-зависимости (например, @workspace/api-client-react)
           find . -name "package.json" -exec sed -i '/@workspace\//d' {} +
           find . -name "package.json" -exec sed -i 's/"catalog:[^"]*"/"latest"/g' {} +
           find . -name "package.json" -exec sed -i 's/"catalog:"/"latest"/g' {} +
           find . -name "package.json" -exec sed -i 's/"workspace:\*"/"latest"/g' {} +
           find . -name "package.json" -exec sed -i '/@replit\//d' {} +
+
+      - name: Fix duplicate imports in vite.config.ts
+        run: |
+          if [ -f "vite.config.ts" ]; then
+            # Оставляем только уникальные строки импортов или убираем дубли
+            awk '!seen[$0]++' vite.config.ts > vite.config.tmp && mv vite.config.tmp vite.config.ts
+          fi
 
       - name: Install dependencies and build
         run: |
@@ -46,4 +52,3 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./dist
           cname: lutchic.de5.net
-          
