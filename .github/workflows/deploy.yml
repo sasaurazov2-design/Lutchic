@@ -23,23 +23,23 @@ jobs:
         with:
           node-version: 20
 
-      - name: Clean everything and fix tsconfig
+      - name: Clean configs and strip tsconfig imports
         run: |
           rm -f pnpm-workspace.yaml
           rm -f vite.config.ts
           rm -f tsconfig.base.json
 
-          # Удаляем строчку extends из tsconfig.json
-          find . -name "tsconfig.json" -type f -exec sed -i '/extends/d' {} +
+          # Удаляем файлы tsconfig, чтобы Vite не пытался проверять несуществующие пути
+          find . -name "tsconfig*.json" -type f -delete
 
           # Исправляем скрипт сборки в package.json
           find . -name "package.json" -type f -exec sed -i 's/"build":\s*"[^"]*"/"build": "vite build"/g' {} +
 
           find . -name "package.json" -type f -exec sed -i '/@workspace\//d' {} +
           find . -name "package.json" -type f -exec sed -i 's/"catalog:[^"]*"/"latest"/g' {} +
-          find . -name "package.json" -exec sed -i 's/"catalog:"/"latest"/g' {} +
+          find . -name "package.json" -type f -exec sed -i 's/"catalog:"/"latest"/g' {} +
           find . -name "package.json" -exec sed -i 's/"workspace:\*"/"latest"/g' {} +
-          find . -name "package.json" -exec sed -i '/@replit\//d' {} +
+          find . -name "package.json" -type f -exec sed -i '/@replit\//d' {} +
 
       - name: Install dependencies and build
         run: |
