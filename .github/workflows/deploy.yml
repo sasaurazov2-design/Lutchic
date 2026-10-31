@@ -19,7 +19,7 @@ jobs:
           version: latest
 
       - name: Set up Node.js
-        uses: setup-node@v4
+        uses: actions/setup-node@v4
         with:
           node-version: 20
 
@@ -29,17 +29,17 @@ jobs:
           rm -f vite.config.ts
           rm -f tsconfig.base.json
 
-          # Удаляем строчку extends из tsconfig.json, чтобы он не искал base-файл
+          # Удаляем строчку extends из tsconfig.json
           find . -name "tsconfig.json" -type f -exec sed -i '/extends/d' {} +
 
-          # Исправляем скрипт сборки
+          # Исправляем скрипт сборки в package.json
           find . -name "package.json" -type f -exec sed -i 's/"build":\s*"[^"]*"/"build": "vite build"/g' {} +
 
           find . -name "package.json" -type f -exec sed -i '/@workspace\//d' {} +
           find . -name "package.json" -type f -exec sed -i 's/"catalog:[^"]*"/"latest"/g' {} +
-          find . -name "package.json" -type f -exec sed -i 's/"catalog:"/"latest"/g' {} +
-          find . -name "package.json" -type f -exec sed -i 's/"workspace:\*"/"latest"/g' {} +
-          find . -name "package.json" -type f -exec sed -i '/@replit\//d' {} +
+          find . -name "package.json" -exec sed -i 's/"catalog:"/"latest"/g' {} +
+          find . -name "package.json" -exec sed -i 's/"workspace:\*"/"latest"/g' {} +
+          find . -name "package.json" -exec sed -i '/@replit\//d' {} +
 
       - name: Install dependencies and build
         run: |
