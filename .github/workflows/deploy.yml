@@ -23,40 +23,20 @@ jobs:
         with:
           node-version: 20
 
-      - name: Force clean build script and remove configs
+      - name: Clean configs and fix package.json
         run: |
           rm -f pnpm-workspace.yaml
           rm -f vite.config.ts
           rm -f tsconfig.base.json
 
-          # Принудительно перезаписываем скрипт build во всех package.json на чистый vite build
-          node -e '
-            const fs = require("fs");
-            const glob = require("glob");
-            // Простая рекурсивная замена в package.json
-            const walk = (dir) => {
-              fs.readdirSync(dir).forEach(file => {
-                const path = dir + "/" + file;
-                if (fs.statSync(path).isDirectory()) {
-                  if (file !== "node_modules" && file !== ".git") walk(path);
-                } else if (file === "package.json") {
-                  let content = JSON.parse(fs.readFileSync(path, "utf8"));
-                  if (content.scripts && content.scripts.build) {
-                    content.scripts.build = "vite build";
-                    fs.writeFileSync(path, JSON.stringify(content, null, 2));
-                    console.log("Updated build script in " + path);
-                  }
-                }
-              });
-            };
-            walk(".");
-          '
+          # Исправляем скрипт сборки во всех package.json с помощью стандартного sed
+          find . -name "package.json" -type f -exec sed -i 's/"build":\s*"[^"]*"/"build": "vite build"/g' {} +
 
-          find . -name "package.json" -exec sed -i '/@workspace\//d' {} +
-          find . -name "package.json" -exec sed -i 's/"catalog:[^"]*"/"latest"/g' {} +
-          find . -name "package.json" -exec sed -i 's/"catalog:"/"latest"/g' {} +
+          find . -name "package.json" -type f -exec sed -i '/@workspace\//d' {} +
+          find . -name "package.json" -type f -exec sed -i 's/"catalog:[^"]*"/"latest"/g' {} +
+          find . -name "package.json" -type f -exec sed -i 's/"catalog:"/"latest"/g' {} +
           find . -name "package.json" -exec sed -i 's/"workspace:\*"/"latest"/g' {} +
-          find . -name "package.json" -exec sed -i '/@replit\//d' {} +
+          find . -name "package.json" -type f -exec sed -i '/@replit\//d' {} +
 
       - name: Install dependencies and build
         run: |
