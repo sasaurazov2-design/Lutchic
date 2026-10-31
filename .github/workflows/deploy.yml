@@ -23,7 +23,7 @@ jobs:
         with:
           node-version: 20
 
-      - name: Fix catalog references in package.json
+      - name: Fix Replit catalog references in package.json
         run: |
           find . -name "package.json" -exec sed -i 's/"catalog:"/"latest"/g' {} +
           find . -name "package.json" -exec sed -i '/@replit\//d' {} +
