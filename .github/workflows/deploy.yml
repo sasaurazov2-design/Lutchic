@@ -23,13 +23,15 @@ jobs:
         with:
           node-version: 20
 
-      - name: Fix Replit catalog references in package.json
+      - name: Fix workspace and packages for production build
         run: |
+          rm -f pnpm-workspace.yaml
           find . -name "package.json" -exec sed -i 's/"catalog:"/"latest"/g' {} +
+          find . -name "package.json" -exec sed -i 's/"workspace:\*"/"latest"/g' {} +
           find . -name "package.json" -exec sed -i '/@replit\//d' {} +
 
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile --recursive
+        run: pnpm install --no-frozen-lockfile
 
       - name: Build project
         run: pnpm --filter @workspace/lutchic-socials run build
