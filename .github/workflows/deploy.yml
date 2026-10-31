@@ -29,11 +29,19 @@ jobs:
           if [ -f "pnpm-workspace.yaml" ]; then
             grep -v "catalogs:" pnpm-workspace.yaml > temp.yaml && mv temp.yaml pnpm-workspace.yaml
           fi
+          
           # Заменяем ВСЕ упоминания catalog: на latest во всех package.json
           find . -name "package.json" -exec sed -i 's/"catalog:[^"]*"/"latest"/g' {} +
           find . -name "package.json" -exec sed -i 's/"catalog:"/"latest"/g' {} +
+          
+          # Заменяем workspace:* на latest (решает ошибку с @workspace/api-client-react)
+          find . -name "package.json" -exec sed -i 's/"workspace:\*"/"latest"/g' {} +
+          
           # Удаляем плагины Replit
           find . -name "package.json" -exec sed -i '/@replit\//d' {} +
+          
+          # Удаляем старый lock-файл, чтобы pnpm не тянул старые ссылки на воркспейс
+          rm -f pnpm-lock.yaml
 
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile --recursive
