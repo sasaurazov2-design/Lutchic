@@ -31,9 +31,8 @@ jobs:
           find . -name "package.json" -exec sed -i 's/"workspace:\*"/"latest"/g' {} +
           find . -name "package.json" -exec sed -i '/@replit\//d' {} +
 
-      - name: Install dependencies and build inside package dir
+      - name: Install dependencies and build
         run: |
-          cd artifacts/lutchic-socials
           pnpm install --no-frozen-lockfile
           pnpm run build
         env:
@@ -43,5 +42,5 @@ jobs:
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./artifacts/lutchic-socials/dist/public
+          publish_dir: ./dist
           cname: lutchic.de5.net
