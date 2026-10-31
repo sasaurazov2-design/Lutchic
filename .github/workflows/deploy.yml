@@ -23,10 +23,14 @@ jobs:
         with:
           node-version: 20
 
-      - name: Clean Replit junk and drop broken config
+      - name: Clean Replit junk and create clean config
         run: |
           rm -f pnpm-workspace.yaml
           rm -f vite.config.ts
+          
+          # Создаем чистейший конфиг без ошибок и дублей
+          echo "import { defineConfig } from 'vite'; import react from '@vitejs/plugin-react'; export default defineConfig({ plugins: [react()] });" > vite.config.ts
+
           find . -name "package.json" -exec sed -i '/@workspace\//d' {} +
           find . -name "package.json" -exec sed -i 's/"catalog:[^"]*"/"latest"/g' {} +
           find . -name "package.json" -exec sed -i 's/"catalog:"/"latest"/g' {} +
