@@ -26,7 +26,7 @@ jobs:
       - name: Clean Replit plugins and catalog configs
         run: |
           rm -f pnpm-workspace.yaml
-          find . -name "package.json" -exec sed -i '/@replit\/vite-plugin-cartographer/d' {} +
+          find . -name "package.json" -exec sed -i '/@replit\//d' {} +
 
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
