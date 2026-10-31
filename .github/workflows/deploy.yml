@@ -23,22 +23,35 @@ jobs:
         with:
           node-version: 20
 
-      - name: Clean configs and strip tsconfig imports
+      - name: Clean Replit junk and generate clean vite config
         run: |
           rm -f pnpm-workspace.yaml
           rm -f vite.config.ts
           rm -f tsconfig.base.json
 
-          # Удаляем файлы tsconfig, чтобы Vite не пытался проверять несуществующие пути
-          find . -name "tsconfig*.json" -type f -delete
+          # Генерируем новый минимальный vite.config.ts с алиасом @ -> ./src
+          cat << 'EOF' > vite.config.ts
+          import { defineConfig } from 'vite';
+          import react from '@vitejs/plugin-react';
+          import path from 'path';
 
-          # Исправляем скрипт сборки в package.json
+          export default defineConfig({
+            plugins: [react()],
+            resolve: {
+              alias: {
+                '@': path.resolve(__dirname, './src'),
+              },
+            },
+          });
+          EOF
+
+          # Исправляем build-скрипт в package.json для использования этого конфига
           find . -name "package.json" -type f -exec sed -i 's/"build":\s*"[^"]*"/"build": "vite build"/g' {} +
 
           find . -name "package.json" -type f -exec sed -i '/@workspace\//d' {} +
           find . -name "package.json" -type f -exec sed -i 's/"catalog:[^"]*"/"latest"/g' {} +
           find . -name "package.json" -type f -exec sed -i 's/"catalog:"/"latest"/g' {} +
-          find . -name "package.json" -exec sed -i 's/"workspace:\*"/"latest"/g' {} +
+          find . -name "package.json" -type f -exec sed -i 's/"workspace:\*"/"latest"/g' {} +
           find . -name "package.json" -type f -exec sed -i '/@replit\//d' {} +
 
       - name: Install dependencies and build
