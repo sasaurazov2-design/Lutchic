@@ -24,7 +24,9 @@ jobs:
           node-version: 20
 
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile --recursive --unsafe-perm=true
+        run: pnpm install --no-frozen-lockfile
+        env:
+          PNPM_CATALOG_ENABLED: 'false'
 
       - name: Build project
         run: pnpm --filter @workspace/lutchic-socials run build
