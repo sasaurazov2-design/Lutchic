@@ -32,10 +32,9 @@ jobs:
           find . -name "package.json" -exec sed -i 's/"workspace:\*"/"latest"/g' {} +
           find . -name "package.json" -exec sed -i '/@replit\//d' {} +
 
-      - name: Fix duplicate imports in vite.config.ts
+      - name: Fix duplicate imports and syntax in vite.config.ts
         run: |
           if [ -f "vite.config.ts" ]; then
-            # Оставляем только уникальные строки импортов или убираем дубли
             awk '!seen[$0]++' vite.config.ts > vite.config.tmp && mv vite.config.tmp vite.config.ts
           fi
 
