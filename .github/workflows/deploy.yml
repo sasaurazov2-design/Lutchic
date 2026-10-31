@@ -23,13 +23,14 @@ jobs:
         with:
           node-version: 20
 
-      - name: Clean Replit junk and create clean config
+      - name: Kill all Replit configs, tsconfig base and catalogs
         run: |
           rm -f pnpm-workspace.yaml
           rm -f vite.config.ts
+          rm -f tsconfig.base.json
           
-          # Создаем чистейший конфиг без ошибок и дублей
-          echo "import { defineConfig } from 'vite'; import react from '@vitejs/plugin-react'; export default defineConfig({ plugins: [react()] });" > vite.config.ts
+          # Убираем расширение tsconfig.base из tsconfig.json, если оно там есть
+          find . -name "tsconfig.json" -exec sed -i '/extends/d' {} +
 
           find . -name "package.json" -exec sed -i '/@workspace\//d' {} +
           find . -name "package.json" -exec sed -i 's/"catalog:[^"]*"/"latest"/g' {} +
