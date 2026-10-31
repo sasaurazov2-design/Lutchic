@@ -23,9 +23,9 @@ jobs:
         with:
           node-version: 20
 
-      - name: Clean Replit plugins and catalog configs
+      - name: Fix catalog references in package.json
         run: |
-          rm -f pnpm-workspace.yaml
+          find . -name "package.json" -exec sed -i 's/"catalog:"/"latest"/g' {} +
           find . -name "package.json" -exec sed -i '/@replit\//d' {} +
 
       - name: Install dependencies
