@@ -23,13 +23,14 @@ jobs:
         with:
           node-version: 20
 
-      - name: Clean Replit junk and generate clean vite config
+      - name: Clean Replit junk and create valid configs
         run: |
           rm -f pnpm-workspace.yaml
           rm -f vite.config.ts
           rm -f tsconfig.base.json
+          rm -f tsconfig.json
 
-          # Генерируем новый минимальный vite.config.ts с алиасом @ -> ./src
+          # 1. Создаем чистый vite.config.ts с поддержкой алиаса @
           cat << 'EOF' > vite.config.ts
           import { defineConfig } from 'vite';
           import react from '@vitejs/plugin-react';
@@ -45,9 +46,33 @@ jobs:
           });
           EOF
 
-          # Исправляем build-скрипт в package.json для использования этого конфига
-          find . -name "package.json" -type f -exec sed -i 's/"build":\s*"[^"]*"/"build": "vite build"/g' {} +
+          # 2. Создаем автономый tsconfig.json без ссылок на tsconfig.base.json
+          cat << 'EOF' > tsconfig.json
+          {
+            "compilerOptions": {
+              "target": "ES2020",
+              "useDefineForClassFields": true,
+              "lib": ["ES2020", "DOM", "DOM.Iterable"],
+              "module": "ESNext",
+              "skipLibCheck": true,
+              "moduleResolution": "bundler",
+              "allowImportingTsExtensions": true,
+              "resolveJsonModule": true,
+              "isolatedModules": true,
+              "noEmit": true,
+              "jsx": "react-jsx",
+              "strict": false,
+              "baseUrl": ".",
+              "paths": {
+                "@/*": ["./src/*"]
+              }
+            },
+            "include": ["src"]
+          }
+          EOF
 
+          # 3. Чистим package.json от воркспейсов и прочего мусора
+          find . -name "package.json" -type f -exec sed -i 's/"build":\s*"[^"]*"/"build": "vite build"/g' {} +
           find . -name "package.json" -type f -exec sed -i '/@workspace\//d' {} +
           find . -name "package.json" -type f -exec sed -i 's/"catalog:[^"]*"/"latest"/g' {} +
           find . -name "package.json" -type f -exec sed -i 's/"catalog:"/"latest"/g' {} +
