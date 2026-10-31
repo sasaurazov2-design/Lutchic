@@ -23,14 +23,34 @@ jobs:
         with:
           node-version: 20
 
-      - name: Kill all Replit configs, tsconfig base and catalogs
+      - name: Force clean build script and remove configs
         run: |
           rm -f pnpm-workspace.yaml
           rm -f vite.config.ts
           rm -f tsconfig.base.json
-          
-          # Убираем расширение tsconfig.base из tsconfig.json, если оно там есть
-          find . -name "tsconfig.json" -exec sed -i '/extends/d' {} +
+
+          # Принудительно перезаписываем скрипт build во всех package.json на чистый vite build
+          node -e '
+            const fs = require("fs");
+            const glob = require("glob");
+            // Простая рекурсивная замена в package.json
+            const walk = (dir) => {
+              fs.readdirSync(dir).forEach(file => {
+                const path = dir + "/" + file;
+                if (fs.statSync(path).isDirectory()) {
+                  if (file !== "node_modules" && file !== ".git") walk(path);
+                } else if (file === "package.json") {
+                  let content = JSON.parse(fs.readFileSync(path, "utf8"));
+                  if (content.scripts && content.scripts.build) {
+                    content.scripts.build = "vite build";
+                    fs.writeFileSync(path, JSON.stringify(content, null, 2));
+                    console.log("Updated build script in " + path);
+                  }
+                }
+              });
+            };
+            walk(".");
+          '
 
           find . -name "package.json" -exec sed -i '/@workspace\//d' {} +
           find . -name "package.json" -exec sed -i 's/"catalog:[^"]*"/"latest"/g' {} +
