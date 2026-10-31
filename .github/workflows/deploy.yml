@@ -23,20 +23,15 @@ jobs:
         with:
           node-version: 20
 
-      - name: Clean Replit junk and catalogs
+      - name: Clean Replit junk and drop broken config
         run: |
           rm -f pnpm-workspace.yaml
+          rm -f vite.config.ts
           find . -name "package.json" -exec sed -i '/@workspace\//d' {} +
           find . -name "package.json" -exec sed -i 's/"catalog:[^"]*"/"latest"/g' {} +
           find . -name "package.json" -exec sed -i 's/"catalog:"/"latest"/g' {} +
           find . -name "package.json" -exec sed -i 's/"workspace:\*"/"latest"/g' {} +
           find . -name "package.json" -exec sed -i '/@replit\//d' {} +
-
-      - name: Fix duplicate imports and syntax in vite.config.ts
-        run: |
-          if [ -f "vite.config.ts" ]; then
-            awk '!seen[$0]++' vite.config.ts > vite.config.tmp && mv vite.config.tmp vite.config.ts
-          fi
 
       - name: Install dependencies and build
         run: |
