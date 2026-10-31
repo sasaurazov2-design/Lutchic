@@ -24,7 +24,7 @@ jobs:
           node-version: 20
 
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --no-frozen-lockfile --shamefully-hoist
 
       - name: Build project
         run: pnpm --filter @workspace/lutchic-socials run build
