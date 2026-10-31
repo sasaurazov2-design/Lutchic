@@ -23,15 +23,17 @@ jobs:
         with:
           node-version: 20
 
-      - name: Fix workspace and packages for production build
+      - name: Clean Replit catalogs and plugins
         run: |
-          rm -f pnpm-workspace.yaml
-          find . -name "package.json" -exec sed -i 's/"catalog:"/"latest"/g' {} +
-          find . -name "package.json" -exec sed -i 's/"workspace:\*"/"latest"/g' {} +
+          # Очищаем только каталог из воркспейса, сохраняя структуру пакетов
+          if [ -f "pnpm-workspace.yaml" ]; then
+            sed -i '/catalogs:/,$d' pnpm-workspace.yaml
+          fi
+          # Убираем только Replit-плагины из package.json, не трогая локальные воркспейсы
           find . -name "package.json" -exec sed -i '/@replit\//d' {} +
 
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: pnpm install --no-frozen-lockfile --recursive
 
       - name: Build project
         run: pnpm --filter @workspace/lutchic-socials run build
